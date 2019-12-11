@@ -1,0 +1,16 @@
+This are correct the points and weights for the 
+respected quadratures reported in Arbramowitz and Stegun. 
+
+Gauss Lobatto DVR of order  5
+ Raw DVR points and weights on -1,1
+  -1.000000  -0.654654  -0.000000   0.654654   1.000000
+
+   0.100000   0.544444   0.711111   0.544444   0.100000
+
+
+
+Gauss Radau DVR of order  5
+ Raw DVR points and weights on 0,infinity
+   0.000000   0.743292   2.571635   5.731179  10.953894
+
+   0.200000   0.601205   0.185732   0.012943   0.000120
