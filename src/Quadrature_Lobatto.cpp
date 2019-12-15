@@ -1,16 +1,12 @@
 #include <vector>
-#include <cmath>
 #include <iostream>
-#include <stdio.h>
 
+#include "Quadrature.H"
 #include "Quadrature_Lobatto.H"
 
-Quadrature_Lobatto::Quadrature_Lobatto(){}
-
-Quadrature_Lobatto::Quadrature_Lobatto(int a_dvr)
-  : m_kind(1), m_kpts(2), m_alpha(0), m_beta(0)
-
+Quadrature_Lobatto::Quadrature_Lobatto(int& a_dvr):Quadrature(a_dvr)
 {
+  m_kind = 1, m_kpts = 2, m_alpha = 0, m_beta = 0;
   m_dvr = a_dvr;
   double* x = new double[a_dvr];
   double* w = new double[a_dvr];
@@ -24,16 +20,45 @@ Quadrature_Lobatto::Quadrature_Lobatto(int a_dvr)
       m_points.push_back(x[i]);
       m_weights.push_back(w[i]);
     }
+  m_derivatives.reserve(a_dvr);
+  for (int i=0; i<a_dvr; ++i)
+    {
+      m_derivatives[i].reserve(a_dvr);
+      m_derivatives[i][i] = 0.0;
+      for (int k=0; k<a_dvr; ++k)
+        {
+          if(i!=k) m_derivatives[i][i] = m_derivatives[i][i] + 1.0/(x[i]-x[k]);
+        }
+      for (int j=0; j<a_dvr; ++j)
+        {
+          if(i!=j)
+            {
+              double temp = 1.0/(x[j]-x[i]);
+              for (int k=0; k<a_dvr; ++k)
+                {
+                  if((k!=i)&&(k!=j)) temp = temp*(x[i]-x[k])/(x[j]-x[k]);
+                }
+              m_derivatives[i][j] = temp;
+            }
+        }
+    }
 }
 
-std::vector<double> Quadrature_Lobatto::getPoints()
+Quadrature_Lobatto::~Quadrature_Lobatto(){};
+
+std::vector<double> Quadrature_Lobatto::getPoints() const
 {
   return m_points;
 }
 
-std::vector<double> Quadrature_Lobatto::getWeights()
+std::vector<double> Quadrature_Lobatto::getWeights() const
 {
   return m_weights;
+}
+
+std::vector<std::vector<double> > Quadrature_Lobatto::getDerivatives() const
+{
+  return m_derivatives;
 }
 
 void Quadrature_Lobatto::print() const
@@ -43,5 +68,12 @@ void Quadrature_Lobatto::print() const
     {
       std::cout<< "Points " << m_points[i] << " " << 
                   "Weights " << m_weights[i] << std::endl;
+    }
+  for(int i=0; i<m_dvr; ++i)
+    {
+      for(int j=0; j<m_dvr; ++j)
+        {
+          std::cout << "Derivates " << m_derivatives[i][j] << std::endl;
+        }
     }
 }

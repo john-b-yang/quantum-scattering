@@ -1,26 +1,22 @@
 #ifndef _QUADRATURE_LOBATTO_H_
 #define _QUADRATURE_LOBATTO_H_
 
-extern "C" 
-{
-  void gaussq_(int*, int*, double*, 
-              double*, int*, double*, 
-              double*, double*, double*);
-}
+#include "Quadrature.H"
 
-class Quadrature_Lobatto
+class Quadrature_Lobatto:public Quadrature
 {
   public:
-    ///Lobatto wrapper to Fortran quadrature routines
-    Quadrature_Lobatto();
-    Quadrature_Lobatto(int a_dvr);
-    std::vector<double> getPoints();
-    std::vector<double> getWeights();
-    void print() const;
+    ///Lobatto for real part of the grid.
+    Quadrature_Lobatto(int& a_dvr);
+    virtual ~Quadrature_Lobatto();
+    virtual std::vector<double> getPoints() const;
+    virtual std::vector<double> getWeights() const;
+    virtual std::vector<std::vector<double> > getDerivatives() const;
+    virtual void print() const;
   private:
-    unsigned int m_dvr;
-    int m_kind, m_kpts;
+    int m_kind, m_kpts, m_dvr;
     double m_alpha, m_beta;
     std::vector<double> m_points, m_weights;
+    std::vector<std::vector<double> > m_derivatives;
 };
 #endif

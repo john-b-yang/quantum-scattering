@@ -14,3 +14,46 @@ Gauss Radau DVR of order  5
    0.000000   0.743292   2.571635   5.731179  10.953894
 
    0.200000   0.601205   0.185732   0.012943   0.000120
+
+This is what the derivates should be for the above grid.
+
+ Derivatives            1           2   6.7565024887242400
+ Derivatives            1           3  -2.6666666666666670
+ Derivatives            1           4   1.4101641779424259
+ Derivatives            1           5 -0.49999999999999994
+ Derivatives            2           1  -1.2409902530309833
+ Derivatives            2           3   1.7457431218879396
+ Derivatives            2           4 -0.76376261582597293
+ Derivatives            2           5  0.25900974696901713
+ Derivatives            3           1  0.37500000000000017
+ Derivatives            3           2  -1.3365845776954535
+ Derivatives            3           4   1.3365845776954528
+ Derivatives            3           5 -0.37500000000000006
+ Derivatives            4           1 -0.25900974696901724
+ Derivatives            4           2  0.76376261582597360
+ Derivatives            4           3  -1.7457431218879391
+ Derivatives            4           5   1.2409902530309835
+ Derivatives            5           1  0.50000000000000011
+ Derivatives            5           2  -1.4101641779424265
+ Derivatives            5           3   2.6666666666666665
+ Derivatives            5           4  -6.7565024887242391
+ Derivatives            1           2   2.3325811713489766
+ Derivatives            1           3 -0.37473083537671747
+ Derivatives            1           4   4.4387021214059352E-002
+ Derivatives            1           5  -2.2373571863185085E-003
+ Derivatives            2           1 -0.77596905338380484
+ Derivatives            2           3  0.30400091165193516
+ Derivatives            2           4  -2.9416241476637690E-002
+ Derivatives            2           5   1.3843832085075919E-003
+ Derivatives            3           1  0.40351706905452006
+ Derivatives            3           2 -0.98403315065956243
+ Derivatives            3           4   8.3550070714880936E-002
+ Derivatives            3           5  -3.0339891098379169E-003
+ Derivatives            4           1 -0.68589255868218779
+ Derivatives            4           2   1.3664056107886782
+ Derivatives            4           3  -1.1989592787694121
+ Derivatives            4           5   1.8446226662921516E-002
+ Derivatives            5           1   3.7250112096781405
+ Derivatives            5           2  -6.9285275475020995
+ Derivatives            5           3   4.6909823532629780
+ Derivatives            5           4  -1.9874660154390185

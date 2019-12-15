@@ -1,26 +1,22 @@
 #ifndef _QUADRATURE_RADAU_H_
 #define _QUADRATURE_RADAU_H_
 
-extern "C"  
-{
-  void gaussq_(int*, int*, double*, 
-              double*, int*, double*, 
-              double*, double*, double*);
-}
+#include "Quadrature.H"
 
-class Quadrature_Radau
+class Quadrature_Radau:public Quadrature
 {
   public:
-    ///Radau wrapper to Fortran quadrature routines
-    Quadrature_Radau();
-    Quadrature_Radau(int a_dvr);
-    std::vector<double> getPoints() const;
-    std::vector<double> getWeights() const;
-    void print() const;
+    ///Radau for complex tail. 
+    Quadrature_Radau(int& a_dvr);
+    virtual ~Quadrature_Radau();
+    virtual std::vector<double> getPoints() const;
+    virtual std::vector<double> getWeights() const;
+    virtual std::vector<std::vector<double> > getDerivatives() const;
+    virtual void print() const;
   private:
-    unsigned int m_dvr;
     int m_kind, m_kpts;
     double m_alpha, m_beta;
     std::vector<double> m_points, m_weights;
+    std::vector<std::vector<double> > m_derivatives;
 };
 #endif

@@ -23,7 +23,11 @@ FORTFOBJS := $(patsubst %.f, $(fortObjDir)/%.o, $(FORTFSRC))
 FORT90OBJS := $(patsubst %.f90, $(fortObjDir)/%.o, $(FORT90SRC))
 FORTOBJS = $(FORTFOBJS) $(FORT90OBJS)
 
+<<<<<<< HEAD
 # DEPS := $(patsubst $(odir)/%.o, $(ddir)/%.d, $(CPPOBJS))
+=======
+DEPS := $(patsubst $(odir)/%.o, $(ddir)/%.d, $(CPPOBJS))
+>>>>>>> zachs_branch
 
 $(odir)/%.o:%.cpp GNUmakefile
 	mkdir -p $(odir);$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
@@ -49,5 +53,10 @@ listfort:
 listdep:
 	@echo $(DEPS)
 
+<<<<<<< HEAD
 clean:
 	rm -r $(CPPOBJS) $(CPPOBJS:.o=.d) $(FORTOBJS) *.exe 
+=======
+cleantree:
+	rm -r $(CPPOBJS) $(CPPOBJS:.o=.d) $(FORTOBJS) $(DEPS) 
+>>>>>>> zachs_branch

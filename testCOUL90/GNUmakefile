@@ -6,13 +6,6 @@ FFLAGS = -lgfortran
 # CFLAGS += -g 
 
 testQuad: $(CPPOBJS) $(FORTOBJS) testQuad.cpp
-<<<<<<< HEAD
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(FFLAGS) -o $@ $^
-=======
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(FFLAGS) -o testQuad.exe $^
-
-clean:
-	rm *.exe
->>>>>>> zachs_branch
 
 -include $(OBJS:.o=.d)

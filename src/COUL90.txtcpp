@@ -1,0 +1,37 @@
+#include <vector>
+#include <iostream>
+
+#include "COUL90.H"
+
+COUL90::COUL90(){}
+
+COUL90::COUL90(int a_lmax, double a_k);
+      : m_xlmin(0.0), m_kfn(0)
+{
+
+  m_lmax = a_lmax;
+  m_k = a_k;
+  double* fc = new double[a_lmax];
+  double* gc = new double[a_lmax];
+  double* fcp = new double[a_lmax];
+  double* gcp = new double[a_lmax];
+  COUL90_()
+
+
+}
+
+void COUL90::coulombDVR() const;
+{
+
+}
+
+void COUL90::orbDVR() const;
+{
+
+}
+
+void COUL90::plotCoulomb() const;
+{
+
+}
+
