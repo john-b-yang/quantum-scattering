@@ -1,0 +1,37 @@
+#ifndef _COUL90_H_
+#define _COUL90_H_
+
+/* #include "FEMDVR.H" */
+
+extern "C"
+{
+  void COUL90_(double*,double*,double*,
+              int*,double*,double*,
+              double*,double*,int*,int*)
+}
+
+class COUL90:public FEMDVR
+{
+  public:
+    /// A wrapper for the COUL90 Fortran routines that computes hypergeometric functions
+    COUL90();
+    COUL90(int a_lmax, double a_k);
+    ~COUL90();
+
+    /// Generates the expansion of a coulomb wave on the DVR grid
+    void coulombDVR() const;
+
+    /// Generates the one-electron testing functions expansion coefficients on DVR grid
+    void orbDVR() const;
+
+    void plot() const;
+
+    virtual void print();
+
+  private:
+    int m_info, m_lmax;
+    double m_k, m_reta, m_xlmin, m_kfn;
+    vector<double> m_fc, m_fcp, m_gc, m_gcp
+    vector<vector<complex<double> > > m_coulexp, m_psik;
+};
+#endif
