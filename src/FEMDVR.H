@@ -3,10 +3,13 @@
 #include <cmath>
 #include <vector>
 #include <complex>
+#include <fstream>
 #include <iostream>
+#include <algorithm>
 
 #include "Quadrature_Lobatto.H"
 #include "Quadrature_Radau.H"
+#include "gnuplot.H"
 
 class FEMDVR
 {
@@ -23,6 +26,7 @@ class FEMDVR
       m_Lndvr = a_Lndvr;
       m_Rndvr = a_Rndvr;
       m_Nelem = a_Nelem;
+      m_NRealbas = (a_Nelem-1)*(a_Lndvr-1)-1;
       m_Nbas = (a_Nelem-1)*(a_Lndvr-1)+a_Rndvr-1;
       m_eit = std::polar(1.0,M_PI*m_theta/180.0);
 
@@ -76,10 +80,58 @@ class FEMDVR
       m_complexbounds[m_Nelem] = radtempX[a_Rndvr];
       m_realbounds[m_Nelem] = (m_complexbounds[m_Nelem]-m_R0)*
                               conj(m_eit)+m_R0;
+
+      for (int i = 0; i<m_Nbas; ++i)
+        {
+          std::vector<std::complex<double> > tempPoints;
+	  std::complex<double>fac;
+	  int start, end;
+          if (i < m_NRealbas)
+            {
+	      start = 0, end = m_Lndvr; fac = 1.0;
+              for (int element = 0; element < m_Nelem-1; ++element)
+                {
+                  if (element == 0) 
+                    {
+		      start = 1;
+		      std::copy(m_points.begin(), m_points.begin() + m_Lndvr,
+			  	std::back_inserter(tempPoints));
+                    }
+                  else
+                    {
+		      std::copy(m_points.begin() + (element-1)*(m_Lndvr-1), 
+			  	m_points.begin() +  element*(m_Lndvr-1),
+			  	std::back_inserter(tempPoints));
+                    }
+                }
+            }
+          else
+            {
+	      start = 0, end = m_Rndvr;
+	      fac = std::exp(-m_alphaRad*conj(m_eit)*(m_points[i]-m_R0));
+	      std::copy(m_points.begin() + m_Nbas - m_Rndvr + 1, 
+			m_points.begin() + m_Nbas,
+			std::back_inserter(tempPoints));
+            }
+          std::complex<double> prod = 0.0;
+          for (int j = start; j < end; ++j)
+            {
+              for (int k = start; k < end; ++k)
+                {
+                  if (k != j)
+                    {
+                      prod *= (m_points[i]-tempPoints[k])/
+                              (tempPoints[j]-tempPoints[k]);
+                    }
+                }
+            }
+          m_dvrBasis.push_back(prod*fac/sqrt(m_weights[i]));
+        }
+          
     } //end of constructor
 
     /// Destructor.
-    /* virtual ~FEMDVR(){}; */
+    virtual ~FEMDVR(){};
 
     /// Getter for points.
     std::vector<std::complex<double> > getPoints() const
@@ -93,9 +145,27 @@ class FEMDVR
       return m_weights;
     }
 
-    /// Plots the DVR basis functions in DIM dimensions.
+    /// Plots the DVR basis functions.
+    void plotDVR() const
+    {
+      system("mkdir -p Data");
+      std::ofstream outfile;
+      outfile.open("dvr.dat");
+      for (int i = 0; i< m_points.size(); ++i)
+	{
+	  outfile << m_points[i].real() << " " 
+                  << m_dvrBasis[i].real() << std::endl;
+	}
+      outfile.close();
+      system("mv dvr.dat Data/");
 
-    /* void plotDVR(int DIM) const; */
+      system("mkdir -p Figures");
+      gnuplot plot;
+      plot("set terminal postscript eps color");
+      plot("set output \"DVRBasis.eps\" ");
+      plot("plot \"./Data/dvr.dat\" u 1:2 w l ");
+      system("mv DVRBasis.eps Figures/");
+    }
 
     /// Get number of basis functions
     const int& getNbas(){return m_Nbas;}
@@ -116,17 +186,19 @@ class FEMDVR
       for( int i = 0; i<m_points.size(); ++i )
         {
           std::cout << "Point " << m_points[i] << "; " 
-                    << "Weights " << m_weights[i] << std::endl;
+                    << "Weights " << m_weights[i] << "; " 
+                    << "DVR Basis " << m_dvrBasis[i] << std::endl;
         }
       std::cout << "R0 = " << m_R0 << "; "
                 << "Theta = " << m_theta << std::endl;
     }
 
   protected:
-    int m_Nelem, m_Nbas, m_Lndvr, m_Rndvr;
+    int m_Nelem, m_Nbas, m_NRealbas, m_Lndvr, m_Rndvr;
     double m_theta, m_alphaRad;
     std::complex<double> m_eit, m_R0;
     std::vector<std::complex<double> > m_points, m_weights;
     std::vector<std::complex<double> > m_realbounds, m_complexbounds;
+    std::vector<std::complex<double> > m_dvrBasis;
 };
 #endif

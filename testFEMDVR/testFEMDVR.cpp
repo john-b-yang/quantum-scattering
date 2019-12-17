@@ -10,6 +10,8 @@ int main(int argc, char** argv)
   FEMDVR FEMDVR(ndvr, mdvr, nel);
   FEMDVR.print();
 
+  /* FEMDVR.plotDVR(); */
+
   return 0;
 }
 

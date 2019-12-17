@@ -8,7 +8,7 @@ class gnuplot
   public:
     gnuplot();
     ~gnuplot();
-    void operator() (const string& command);
+    void operator() (const std::string& command);
   protected:
     FILE *gnuplotpipe;
 };
@@ -22,9 +22,9 @@ gnuplot::~gnuplot()
   fprintf(gnuplotpipe, "exit\n");
   pclose(gnuplotpipe);
 }
-void gnuplot::operator() (const string& command)
+void gnuplot::operator() (const std::string& command)
 {
-  fprint(gnuplotpipe, "%s\n", command.c_str());
+  fprintf(gnuplotpipe, "%s\n", command.c_str());
   fflush(gnuplotpipe);
 }
 #endif
