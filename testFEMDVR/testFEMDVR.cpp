@@ -5,12 +5,12 @@
 
 int main(int argc, char** argv)
 {
-  int ndvr = 5, mdvr = 5, nel = 2;
+  int ndvr = 5, mdvr = 5, nel = 3;
   
   FEMDVR FEMDVR(ndvr, mdvr, nel);
-  FEMDVR.print();
 
-  /* FEMDVR.plotDVR(); */
+  FEMDVR.print();
+  FEMDVR.plotDVR();
 
   return 0;
 }

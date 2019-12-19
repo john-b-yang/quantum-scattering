@@ -35,7 +35,7 @@ class FEMDVR
         {
           m_realbounds.push_back(i*10);
         }
-      m_R0 = m_realbounds[-1];
+      m_R0 = m_realbounds[a_Nelem-1];
       m_complexbounds = m_realbounds;
       m_complexbounds.back() = m_R0 + m_eit*(m_realbounds.back()-m_R0);
 
@@ -71,62 +71,78 @@ class FEMDVR
           radtempW.push_back(radscale*radW[i]);
         }
       m_weights.back()=m_weights.back()+radtempW.front();
-      for (int i = 1; i < radtempX.size(); ++i)
+      for (int dvr = 1; dvr < radtempX.size(); ++dvr)
         {
-          m_points.push_back(radtempX[i]);
-          m_weights.push_back(radtempW[i]);
+          m_points.push_back(radtempX[dvr]);
+          m_weights.push_back(radtempW[dvr]);
         }
 
       m_complexbounds[m_Nelem] = radtempX[a_Rndvr];
       m_realbounds[m_Nelem] = (m_complexbounds[m_Nelem]-m_R0)*
                               conj(m_eit)+m_R0;
 
-      for (int i = 0; i<m_Nbas; ++i)
+      int start, end;
+      std::complex<double>fac;
+      std::vector<std::complex<double> > tempPoints, tempWeights;
+      for (int element = 0; element < m_Nelem; ++element)
         {
-          std::vector<std::complex<double> > tempPoints;
-	  std::complex<double>fac;
-	  int start, end;
-          if (i < m_NRealbas)
+          if (element == 0) 
             {
-	      start = 0, end = m_Lndvr; fac = 1.0;
-              for (int element = 0; element < m_Nelem-1; ++element)
-                {
-                  if (element == 0) 
-                    {
-		      start = 1;
-		      std::copy(m_points.begin(), m_points.begin() + m_Lndvr,
-			  	std::back_inserter(tempPoints));
-                    }
-                  else
-                    {
-		      std::copy(m_points.begin() + (element-1)*(m_Lndvr-1), 
-			  	m_points.begin() +  element*(m_Lndvr-1),
-			  	std::back_inserter(tempPoints));
-                    }
-                }
+              start = 1; end = m_Lndvr; fac = 1.0;
+              tempPoints.push_back(0.0);
+              tempWeights.push_back(0.0);
+              std::copy(m_points.begin() + 1, m_points.begin() + m_Lndvr - 1,
+                        std::back_inserter(tempPoints));
+              std::copy(m_weights.begin() + 1, m_weights.begin() + m_Lndvr - 1,
+                        std::back_inserter(tempWeights));
+            }
+          else if (element == m_Nelem - 1)
+            {
+              start = 0; end = m_Rndvr;
+              std::copy(m_points.begin() + m_Nbas - m_Rndvr, 
+                        m_points.begin() + m_Nbas,
+                        std::back_inserter(tempPoints));
+              std::copy(m_weights.begin() + m_Nbas - m_Rndvr, 
+                        m_weights.begin() + m_Nbas,
+                        std::back_inserter(tempWeights));
             }
           else
             {
-	      start = 0, end = m_Rndvr;
-	      fac = std::exp(-m_alphaRad*conj(m_eit)*(m_points[i]-m_R0));
-	      std::copy(m_points.begin() + m_Nbas - m_Rndvr + 1, 
-			m_points.begin() + m_Nbas,
-			std::back_inserter(tempPoints));
+              start = 0; end = m_Lndvr; fac = 1.0;
+              std::copy(m_points.begin() + (element)*(m_Lndvr-2), 
+                        m_points.begin() +  (element+1)*(m_Lndvr-1),
+                        std::back_inserter(tempPoints));
+              std::copy(m_weights.begin() + (element)*(m_Lndvr-2), 
+                        m_weights.begin() +  (element+1)*(m_Lndvr-1),
+                        std::back_inserter(tempWeights));
             }
-          std::complex<double> prod = 0.0;
-          for (int j = start; j < end; ++j)
+          //Need to loop through all basis functions or something here...
+          for (auto& point : tempPoints)
             {
-              for (int k = start; k < end; ++k)
+              if(element == m_Nelem-1)
                 {
-                  if (k != j)
-                    {
-                      prod *= (m_points[i]-tempPoints[k])/
-                              (tempPoints[j]-tempPoints[k]);
-                    }
+                  fac = std::exp(-m_alphaRad*conj(m_eit)*(point-m_R0));
                 }
+              std::complex<double> accum = 0.0;
+              for (int j = start; j < end; ++j)
+                {
+                  std::complex<double> prod = 1.0;
+                  for (int k = start; k < end; ++k)
+                    {
+                      if (k != j)
+                        {
+                          prod *= (point-tempPoints[k])/
+                                  (tempPoints[j]-tempPoints[k]);
+                        }
+                    }
+                  accum += prod/sqrt(tempWeights[j]);
+                }
+              m_dvrBasis.push_back(accum*fac);
             }
-          m_dvrBasis.push_back(prod*fac/sqrt(m_weights[i]));
+          tempPoints.clear();
+          tempWeights.clear();
         }
+      /* std::cout<<m_dvrBasis.size()<<std::endl; */
           
     } //end of constructor
 

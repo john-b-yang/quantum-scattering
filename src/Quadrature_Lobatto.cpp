@@ -20,10 +20,10 @@ Quadrature_Lobatto::Quadrature_Lobatto(int& a_dvr):Quadrature(a_dvr)
       m_points.push_back(x[i]);
       m_weights.push_back(w[i]);
     }
-  m_derivatives.reserve(a_dvr);
+  m_derivatives.resize(a_dvr);
   for (int i=0; i<a_dvr; ++i)
     {
-      m_derivatives[i].reserve(a_dvr);
+      m_derivatives[i].resize(a_dvr);
       m_derivatives[i][i] = 0.0;
       for (int k=0; k<a_dvr; ++k)
         {
