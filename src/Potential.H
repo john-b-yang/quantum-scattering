@@ -74,4 +74,5 @@ public:
   Coulomb(std::vector<double> i_points, std::vector<double> m_weights, int& a_Z);
 };
 
+
 #endif
