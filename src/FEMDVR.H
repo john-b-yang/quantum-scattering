@@ -14,9 +14,9 @@
 class FEMDVR
 {
   public:
-    /// Interface base class for FEM-DVR grid 
+    /// Interface base class for FEM-DVR grid
 
-    /// Default constructor 
+    /// Default constructor
     FEMDVR();
 
     /// Constructor arguments: lobatto and radau order, number of elements.
@@ -60,7 +60,7 @@ class FEMDVR
             }
         }
 
-      Quadrature_Radau radauQuad(a_Rndvr); 
+      Quadrature_Radau radauQuad(a_Rndvr);
       std::vector<double> radX = radauQuad.getPoints();
       std::vector<double> radW = radauQuad.getWeights();
       std::vector<std::complex<double> > radtempX, radtempW;
@@ -86,7 +86,7 @@ class FEMDVR
       std::vector<std::complex<double> > tempPoints, tempWeights;
       for (int element = 0; element < m_Nelem; ++element)
         {
-          if (element == 0) 
+          if (element == 0)
             {
               start = 1; end = m_Lndvr; fac = 1.0;
               tempPoints.push_back(0.0);
@@ -99,29 +99,28 @@ class FEMDVR
           else if (element == m_Nelem - 1)
             {
               start = 0; end = m_Rndvr;
-              std::copy(m_points.begin() + m_Nbas - m_Rndvr, 
+              std::copy(m_points.begin() + m_Nbas - m_Rndvr,
                         m_points.begin() + m_Nbas,
                         std::back_inserter(tempPoints));
-              std::copy(m_weights.begin() + m_Nbas - m_Rndvr, 
+              std::copy(m_weights.begin() + m_Nbas - m_Rndvr,
                         m_weights.begin() + m_Nbas,
                         std::back_inserter(tempWeights));
             }
           else
             {
               start = 0; end = m_Lndvr; fac = 1.0;
-              std::copy(m_points.begin() + (element)*(m_Lndvr-2), 
+              std::copy(m_points.begin() + (element)*(m_Lndvr-2),
                         m_points.begin() +  (element+1)*(m_Lndvr-1),
                         std::back_inserter(tempPoints));
-              std::copy(m_weights.begin() + (element)*(m_Lndvr-2), 
+              std::copy(m_weights.begin() + (element)*(m_Lndvr-2),
                         m_weights.begin() +  (element+1)*(m_Lndvr-1),
                         std::back_inserter(tempWeights));
             }
-          //Need to loop through all basis functions or something here...
-          for (auto& point : tempPoints)
+          for (int i = 0; i < tempPoints.size(); ++i)
             {
               if(element == m_Nelem-1)
                 {
-                  fac = std::exp(-m_alphaRad*conj(m_eit)*(point-m_R0));
+                  fac = std::exp(-m_alphaRad*conj(m_eit)*(tempPoints[i]-m_R0));
                 }
               std::complex<double> accum = 0.0;
               for (int j = start; j < end; ++j)
@@ -131,11 +130,11 @@ class FEMDVR
                     {
                       if (k != j)
                         {
-                          prod *= (point-tempPoints[k])/
+                          prod *= (tempPoints[i]-tempPoints[k])/
                                   (tempPoints[j]-tempPoints[k]);
                         }
                     }
-                  accum += prod/sqrt(tempWeights[j]);
+                  accum += prod/sqrt(tempWeights[i]);
                 }
               m_dvrBasis.push_back(accum*fac);
             }
@@ -143,7 +142,7 @@ class FEMDVR
           tempWeights.clear();
         }
       /* std::cout<<m_dvrBasis.size()<<std::endl; */
-          
+
     } //end of constructor
 
     /// Destructor.
@@ -169,7 +168,7 @@ class FEMDVR
       outfile.open("dvr.dat");
       for (int i = 0; i< m_points.size(); ++i)
 	{
-	  outfile << m_points[i].real() << " " 
+	  outfile << m_points[i].real() << " "
                   << m_dvrBasis[i].real() << std::endl;
 	}
       outfile.close();
@@ -194,15 +193,15 @@ class FEMDVR
       std::cout << std::endl;
       std::cout << "*** FEM-DVR Grid***" << std::endl;
       std::cout << std::endl;
-      std::cout << "Lobatto Order = " << m_Lndvr << "; " 
+      std::cout << "Lobatto Order = " << m_Lndvr << "; "
                 << "Radau Order = " << m_Rndvr << std::endl;
       std::cout << "Number of Finite-Elements = " << m_Nelem << "; "
                 << "Number of Basis Functions = " << m_Nbas << std::endl;
       std::cout << std::endl;
       for( int i = 0; i<m_points.size(); ++i )
         {
-          std::cout << "Point " << m_points[i] << "; " 
-                    << "Weights " << m_weights[i] << "; " 
+          std::cout << "Point " << m_points[i] << "; "
+                    << "Weights " << m_weights[i] << "; "
                     << "DVR Basis " << m_dvrBasis[i] << std::endl;
         }
       std::cout << "R0 = " << m_R0 << "; "

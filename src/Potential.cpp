@@ -1,8 +1,10 @@
 #include <fstream>
 #include <vector>
 #include <iostream>
-#include <Potential.H>
 #include <cmath>
+#include "Potential.H"
+#include "gnuplot.H"
+
 #define Const_E        2.71828182845904523536
 
 void Potential::plot_potential() const
@@ -12,7 +14,7 @@ void Potential::plot_potential() const
   outfile.open("potential.dat");
   for (int i = 0; i < m_potential.size(); ++i)
   {
-    outfile << m_points[i] << " " 
+    outfile << m_points[i] << " "
                   << m_potential[i] << std::endl;
   }
   outfile.close();
