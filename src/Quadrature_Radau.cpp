@@ -21,14 +21,14 @@ Quadrature_Radau::Quadrature_Radau(int& a_dvr):Quadrature(a_dvr)
       m_points.push_back(x[i]);
       m_weights.push_back(w[i]);
     }
-  m_derivatives.reserve(a_dvr);
+  m_derivatives.resize(a_dvr);
   for (int i=0; i<a_dvr; ++i)
     {
-      m_derivatives[i].reserve(a_dvr);
+      m_derivatives[i].resize(a_dvr);
       m_derivatives[i][i] = 0.0;
       for (int k=0; k<a_dvr; ++k)
         {
-          if(i!=k) m_derivatives[i][i] = m_derivatives[i][i] + 1.0/(x[i]-x[k]);
+          if(i!=k) m_derivatives[i][i] += 1.0/(x[i]-x[k]);
         }
       for (int j=0; j<a_dvr; ++j)
         {
@@ -37,7 +37,7 @@ Quadrature_Radau::Quadrature_Radau(int& a_dvr):Quadrature(a_dvr)
               double temp = 1.0/(x[j]-x[i]);
               for (int k=0; k<a_dvr; ++k)
                 {
-                  if((k!=i)&&(k!=j)) temp = temp*(x[i]-x[k])/(x[j]-x[k]);
+                  if((k!=i)&&(k!=j)) temp *= (x[i]-x[k])/(x[j]-x[k]);
                 }
               m_derivatives[i][j] = temp;
             }

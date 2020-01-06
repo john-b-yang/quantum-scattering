@@ -12,7 +12,7 @@ FC = gfortran
 fortObjDir = $(FORTDIR)/objects
 
 VPATH = $(HOME) $(SRC) $(FORTDIR)
-CXXFLAGS = -Wall -I$(SRC) -std=c++11
+CXXFLAGS = -Wall -I$(SRC) -std=c++11 -g
 
 CPPSRC := $(notdir $(wildcard $(SRC)/*.cpp))
 CPPOBJS := $(patsubst %.cpp, $(odir)/%.o, $(CPPSRC))
