@@ -7,6 +7,8 @@
 
 #define Const_E        2.71828182845904523536
 
+#Should think about adding time dependent potential
+
 void Potential::plot_potential() const
 {
   system("mkdir -p Data");

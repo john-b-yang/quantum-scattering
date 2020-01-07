@@ -81,11 +81,48 @@ class FEMDVR
       m_realbounds[m_Nelem] = (m_complexbounds[m_Nelem]-m_R0)*
                               conj(m_eit)+m_R0;
 
+      for (int element = 0; element < m_Nelem; ++element)
+        {
+          tempPoints.clear();
+          tempWeights.clear();
+        }
+      /* std::cout<<m_dvrBasis.size()<<std::endl; */
+
+    } //end of constructor
+
+    /// Destructor.
+    virtual ~FEMDVR(){};
+
+    /// Getter for points.
+    std::vector<std::complex<double> > getPoints() const
+    {
+      return m_points;
+    }
+
+    /// Getter for weights.
+    std::vector<std::complex<double> > getWeights() const
+    {
+      return m_weights;
+    }
+
+    std::complex<double> getDVRBasis(const double& a_x)
+    {
+      assert(a_x>m_complexbounds[0] && a_x<=m_complexbounds[m_Nelem]);
+
+/* TODO:Need to find a function in c++ that is the same as count in 
+        fortran or figure out a way to do that */
+      int FEM_loc = 0;
+      for(int element=0; ele<m_Nelem; ++element)
+        {
+          if(a_x<element)
+            {
+              ++FEM_loc;
+            }
+          else break;
+        }
       int start, end;
       std::complex<double>fac;
       std::vector<std::complex<double> > tempPoints, tempWeights;
-      for (int element = 0; element < m_Nelem; ++element)
-        {
           if (element == 0)
             {
               start = 1; end = m_Lndvr; fac = 1.0;
@@ -116,48 +153,30 @@ class FEMDVR
                         m_weights.begin() +  (element+1)*(m_Lndvr-1),
                         std::back_inserter(tempWeights));
             }
-          for (int i = 0; i < tempPoints.size(); ++i)
+      for (int i = 0; i < tempPoints.size(); ++i)
+        {
+          if(element == m_Nelem-1)
             {
-              if(element == m_Nelem-1)
-                {
-                  fac = std::exp(-m_alphaRad*conj(m_eit)*(tempPoints[i]-m_R0));
-                }
-              std::complex<double> accum = 0.0;
-              for (int j = start; j < end; ++j)
-                {
-                  std::complex<double> prod = 1.0;
-                  for (int k = start; k < end; ++k)
-                    {
-                      if (k != j)
-                        {
-                          prod *= (tempPoints[i]-tempPoints[k])/
-                                  (tempPoints[j]-tempPoints[k]);
-                        }
-                    }
-                  accum += prod/sqrt(tempWeights[i]);
-                }
-              m_dvrBasis.push_back(accum*fac);
+              fac = std::exp(-m_alphaRad*conj(m_eit)*(tempPoints[i]-m_R0));
             }
-          tempPoints.clear();
-          tempWeights.clear();
+          std::complex<double> accum = 0.0;
+          for (int j = start; j < end; ++j)
+            {
+              std::complex<double> prod = 1.0;
+              for (int k = start; k < end; ++k)
+                {
+                  if (k != j)
+                    {
+                      prod *= (tempPoints[i]-tempPoints[k])/
+                              (tempPoints[j]-tempPoints[k]);
+                    }
+                }
+              accum += prod/sqrt(tempWeights[i]);
+            }
+          return accum*fac;
+          /* m_dvrBasis.push_back(accum*fac); */
         }
-      /* std::cout<<m_dvrBasis.size()<<std::endl; */
 
-    } //end of constructor
-
-    /// Destructor.
-    virtual ~FEMDVR(){};
-
-    /// Getter for points.
-    std::vector<std::complex<double> > getPoints() const
-    {
-      return m_points;
-    }
-
-    /// Getter for weights.
-    std::vector<std::complex<double> > getWeights() const
-    {
-      return m_weights;
     }
 
     /// Plots the DVR basis functions.
@@ -166,11 +185,14 @@ class FEMDVR
       system("mkdir -p Data");
       std::ofstream outfile;
       outfile.open("dvr.dat");
-      for (int i = 0; i< m_points.size(); ++i)
-	{
-	  outfile << m_points[i].real() << " "
-                  << m_dvrBasis[i].real() << std::endl;
-	}
+      for (int i = 0; i< m_dvrBasis.size(); ++i)
+        {
+          for (int i = 0; i< m_points.size(); ++i)
+            {
+              outfile << m_points[i].real() << " "
+                      << m_dvrBasis[i].real() << std::endl;
+            }
+        }
       outfile.close();
       system("mv dvr.dat Data/");
 
@@ -183,12 +205,12 @@ class FEMDVR
     }
 
     /// Get number of basis functions
-    const int& getNbas(){return m_Nbas;}
+    const int& FEMDVR::getNbas(){return m_Nbas;}
 
     /// Get R0
-    const std::complex<double>& getR0(){return m_R0;}
+    const std::complex<double>& FEMDVR::getR0(){return m_R0;}
 
-    virtual void print() const
+    virtual void FEMDVR::print() const
     {
       std::cout << std::endl;
       std::cout << "*** FEM-DVR Grid***" << std::endl;
