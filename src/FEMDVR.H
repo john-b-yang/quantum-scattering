@@ -3,6 +3,7 @@
 #include <cmath>
 #include <vector>
 #include <complex>
+#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <algorithm>
@@ -81,14 +82,7 @@ class FEMDVR
       m_realbounds[m_Nelem] = (m_complexbounds[m_Nelem]-m_R0)*
                               conj(m_eit)+m_R0;
 
-      for (int element = 0; element < m_Nelem; ++element)
-        {
-          tempPoints.clear();
-          tempWeights.clear();
-        }
-      /* std::cout<<m_dvrBasis.size()<<std::endl; */
-
-    } //end of constructor
+    } //end of constructor for FEMDVR grid
 
     /// Destructor.
     virtual ~FEMDVR(){};
@@ -105,14 +99,12 @@ class FEMDVR
       return m_weights;
     }
 
-    std::complex<double> getDVRBasis(const double& a_x)
+    /// Evaluates function on FEM-DVR grid.
+    std::complex<double> dvrEvaluate(const double& a_x, const std::vector<std::complex<double> >& a_func)
     {
-      assert(a_x>m_complexbounds[0] && a_x<=m_complexbounds[m_Nelem]);
-
-/* TODO:Need to find a function in c++ that is the same as count in 
-        fortran or figure out a way to do that */
+      assert(a_x>m_complexbounds[0].real() && a_x<=m_complexbounds[m_Nelem].real());
       int FEM_loc = 0;
-      for(int element=0; ele<m_Nelem; ++element)
+      for(int element = 0; element < m_Nelem; ++element)
         {
           if(a_x<element)
             {
@@ -120,97 +112,93 @@ class FEMDVR
             }
           else break;
         }
-      int start, end;
-      std::complex<double>fac;
+      int index = 0, start = 0 , end = 0;
+      std::complex<double>fac = 0;
       std::vector<std::complex<double> > tempPoints, tempWeights;
-          if (element == 0)
-            {
-              start = 1; end = m_Lndvr; fac = 1.0;
-              tempPoints.push_back(0.0);
-              tempWeights.push_back(0.0);
-              std::copy(m_points.begin() + 1, m_points.begin() + m_Lndvr - 1,
-                        std::back_inserter(tempPoints));
-              std::copy(m_weights.begin() + 1, m_weights.begin() + m_Lndvr - 1,
-                        std::back_inserter(tempWeights));
-            }
-          else if (element == m_Nelem - 1)
-            {
-              start = 0; end = m_Rndvr;
-              std::copy(m_points.begin() + m_Nbas - m_Rndvr,
-                        m_points.begin() + m_Nbas,
-                        std::back_inserter(tempPoints));
-              std::copy(m_weights.begin() + m_Nbas - m_Rndvr,
-                        m_weights.begin() + m_Nbas,
-                        std::back_inserter(tempWeights));
-            }
-          else
-            {
-              start = 0; end = m_Lndvr; fac = 1.0;
-              std::copy(m_points.begin() + (element)*(m_Lndvr-2),
-                        m_points.begin() +  (element+1)*(m_Lndvr-1),
-                        std::back_inserter(tempPoints));
-              std::copy(m_weights.begin() + (element)*(m_Lndvr-2),
-                        m_weights.begin() +  (element+1)*(m_Lndvr-1),
-                        std::back_inserter(tempWeights));
-            }
-      for (int i = 0; i < tempPoints.size(); ++i)
+      if(FEM_loc==1)
         {
-          if(element == m_Nelem-1)
-            {
-              fac = std::exp(-m_alphaRad*conj(m_eit)*(tempPoints[i]-m_R0));
-            }
-          std::complex<double> accum = 0.0;
-          for (int j = start; j < end; ++j)
-            {
-              std::complex<double> prod = 1.0;
-              for (int k = start; k < end; ++k)
-                {
-                  if (k != j)
-                    {
-                      prod *= (tempPoints[i]-tempPoints[k])/
-                              (tempPoints[j]-tempPoints[k]);
-                    }
-                }
-              accum += prod/sqrt(tempWeights[i]);
-            }
-          return accum*fac;
-          /* m_dvrBasis.push_back(accum*fac); */
+          index=1; start=1; end=m_Lndvr; fac=1.0;
+          tempPoints.push_back(0.0);
+          tempWeights.push_back(0.0);
+          std::copy(m_points.begin() + 1, m_points.begin() + m_Lndvr - 1,
+                    std::back_inserter(tempPoints));
+          std::copy(m_weights.begin() + 1, m_weights.begin() + m_Lndvr - 1,
+                    std::back_inserter(tempWeights));
         }
-
+      else if ((FEM_loc!=1) && (FEM_loc!=m_Nelem))
+        {
+          index=(FEM_loc-1)*(m_Lndvr-1); start=0; end=m_Lndvr; fac=1.0;
+          std::copy(m_points.begin() + (FEM_loc)*(m_Lndvr-2),
+                    m_points.begin() +  (FEM_loc+1)*(m_Lndvr-1),
+                    std::back_inserter(tempPoints));
+          std::copy(m_weights.begin() + (FEM_loc)*(m_Lndvr-2),
+                    m_weights.begin() +  (FEM_loc+1)*(m_Lndvr-1),
+                    std::back_inserter(tempWeights));
+        }
+      else
+        {
+          index=m_Nbas-m_Rndvr+1; start=0; end=m_Rndvr;
+          fac = std::exp(-m_alphaRad*conj(m_eit)*(a_x-m_R0));
+          std::copy(m_points.begin() + m_Nbas - m_Rndvr,
+                    m_points.begin() + m_Nbas,
+                    std::back_inserter(tempPoints));
+          std::copy(m_weights.begin() + m_Nbas - m_Rndvr,
+                    m_weights.begin() + m_Nbas,
+                    std::back_inserter(tempWeights));
+        }
+      std::complex<double> accum = 0.0;
+      for (int j = start; j < end; ++j)
+        {
+          std::complex<double> prod = 1.0;
+          for (int k = start; k < end; ++k)
+            {
+              if (k != j)
+                {
+                  prod *= (a_x-tempPoints[k])/
+                          (tempPoints[j]-tempPoints[k]);
+                }
+            }
+          accum += prod*a_func[index]/sqrt(tempWeights[index]);
+        }
+      return accum*fac;
     }
 
-    /// Plots the DVR basis functions.
-    void plotDVR() const
+    /// Plots a function in the DVR representation.
+    void plotFunction(const std::vector<std::complex<double> >& a_func, const double& a_rmax, const int& a_npoints ) const
     {
+      double dr = a_rmax/a_npoints;
+      std::complex<double> zrad, fval;
       system("mkdir -p Data");
       std::ofstream outfile;
-      outfile.open("dvr.dat");
-      for (int i = 0; i< m_dvrBasis.size(); ++i)
+      outfile.open("dvrFunc.dat");
+      for (int ir = 0; ir < a_npoints; ++ir)
         {
+          zrad = irs*dr;
+          fval = dvrEvaluate(zrad, a_func);
           for (int i = 0; i< m_points.size(); ++i)
             {
-              outfile << m_points[i].real() << " "
-                      << m_dvrBasis[i].real() << std::endl;
+              outfile << zrad << " "
+                      << fval << std::endl;
             }
         }
       outfile.close();
-      system("mv dvr.dat Data/");
+      system("mv dvrFunc.dat Data/");
 
       system("mkdir -p Figures");
       gnuplot plot;
       plot("set terminal postscript eps color");
-      plot("set output \"DVRBasis.eps\" ");
-      plot("plot \"./Data/dvr.dat\" u 1:2 w l ");
-      system("mv DVRBasis.eps Figures/");
+      plot("set output \"DVRFunc.eps\" ");
+      plot("plot \"./Data/dvrFunc.dat\" u 1:2 w l ");
+      system("mv DVRFunc.eps Figures/");
     }
 
     /// Get number of basis functions
-    const int& FEMDVR::getNbas(){return m_Nbas;}
+    const int& getNbas(){return m_Nbas;}
 
     /// Get R0
-    const std::complex<double>& FEMDVR::getR0(){return m_R0;}
+    const std::complex<double>& getR0(){return m_R0;}
 
-    virtual void FEMDVR::print() const
+    virtual void print() const
     {
       std::cout << std::endl;
       std::cout << "*** FEM-DVR Grid***" << std::endl;
